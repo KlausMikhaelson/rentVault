@@ -7,6 +7,12 @@
     <title>Document</title>
 </head>
 <body>
+    <% if (locals.fileLink != null) { %>
+        <div>
+            Your file is uploaded
+            <a href="<%= locals.fileLink %>"><%= locals.fileLink %></a>
+        </div>
+    }
     <form action="/upload" method="POST" enctype="multipart/form-data">
         <label for="file">File:</label>
         <input type="file" id="file" name="file" required>
