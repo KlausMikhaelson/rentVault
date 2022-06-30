@@ -6,7 +6,7 @@ const File = require("./models/File")
 const multer = require("multer");
 const { urlencoded } = require("express");
 const app = express()
-app.use(urlencoded({extended: true}))
+app.use(express.urlencoded({extended: true}))
 
 const upload = multer({ dest: "uploads" })
 
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 
 app.post("/upload", upload.single("file"), async(req, res) =>{
     const fileData = {
-        Path: req.file.path,
+        path: req.file.path,
         originalName: req.file.originalname,
     }
     if(req.body.password != null && req.body.password !== "") {
@@ -31,29 +31,32 @@ app.post("/upload", upload.single("file"), async(req, res) =>{
     res.render("index", {fileLink: `${req.headers.origin}/file/${file.id}`})
 })
 
+// app.get("/file/:id", handleDownload)
+// app.post("/file/:id", handleDownload)
 
-function handleDownload(req, res) {
-    app.get("/file/:id", async (req, res) => {
-        res.send(req.params.id)
-        const file = await File.findById(req.params.id)
-    
-        if(file.password != null) {
-            if(req.body.password == null) {
-                res.render("password")
-                return
-            }
-            if (await bcrypt.compare(req.body.password, file.password)) {
-                res.render ("password", {error: true})
-            }
+// OR
+app.route("/file/:id").get(handleDownload).post(handleDownload)
+
+async function handleDownload(req, res) {
+    const file = await File.findById(req.params.id)
+
+    if(file.password != null) {
+        if(req.body.password == null) {
+            res.render("password")
+            return
         }
-    
-        file.downloadCount++
-        await file.save()
-        console.log(file.downloadCount)
-    
-        res.download(file.path, file.originalName)
-    })
-    
+        
+        if(!(await bcrypt.compare(req.body.password, file.password))) {
+            res.render("password", {error: true})
+            return
+        }
+    }
+
+    file.downloadCount++
+    await file.save()
+    console.log(file.downloadCount)
+
+    res.download(file.path, file.originalName)
 }
 
 app.listen(process.env.PORT)
