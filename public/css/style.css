@@ -1,3 +1,17 @@
 body {
    background-color: aqua;
 }
+
+.main {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.input {
+   margin-top: 10%;
+}
+
+.file-input {
+   margin-bottom: 5%;
+}
